@@ -1,0 +1,1459 @@
+#                             -- LazyCore v0.0.3 --
+#                               Made by @notazex
+#      Need any help or want to report a bug? Join the discord! https://discord.gg/rzzsZkVrfd
+#                         Thank you for using LazyCore!
+#                        Remember to change the options!
+
+options: # Remember to use "true" or "false"!
+    Title: &7Default  # replace the IP with your server's IP (or something else!)
+    IP: &7Default # replace the text with your own text
+    HidePlugins: true # Will only show that you are using the LazyCore skript (with an discord invite) when you type /plugins if this is set to true.
+    CustomJoinMessage: false # Will send an random join message whenever an player joins if this is enabled.
+    CustomLeaveMessage: false # Will do the same thing as "CustomJoinMessage", but it sends an leave message instead.
+    ArenaRegion: arena # Put in your arena's region name.
+    ApplyNightVision: true # Will automatically apply night vision without particles to player when they die or join the server.
+
+on load:
+    send "" to console
+    send "                            &x&0&8&4&c&f&b&lʟ&x&2&0&6&4&f&b&lᴀ&x&3&7&7&c&f&c&lᴢ&x&4&f&9&4&f&c&lʏ&x&6&6&a&b&f&c&lᴄ&x&7&e&c&3&f&c&lᴏ&x&9&5&d&b&f&d&lʀ&x&a&d&f&3&f&d&lᴇ" to console
+    send "" to console
+    send "                 &7Succesfully loaded the &x&0&8&4&c&f&b&lʟ&x&2&0&6&4&f&b&lᴀ&x&3&7&7&c&f&c&lᴢ&x&4&f&9&4&f&c&lʏ&x&6&6&a&b&f&c&lᴄ&x&7&e&c&3&f&c&lᴏ&x&9&5&d&b&f&d&lʀ&x&a&d&f&3&f&d&lᴇ&7!" to console
+    send "" to console
+    play sound "minecraft:block.note_block.bit" at volume 100 to player
+
+on join:
+    if {skips::%player's uuid%} isn't set:
+        set {skips::%player's uuid%} to 0
+    if {revivaltokens::%player's uuid%} isn't set:
+        set {revivaltokens::%player's uuid%} to 0
+    if {alive::*} contains player:
+        remove player from {alive::*}
+    if {dead::*} doesn't contain player:
+        add player to {dead::*}
+        set {status::%player's uuid%} to "&cᴅᴇᴀᴅ"
+    teleport player to {spawn}
+    if {@ApplyNightVision} is true:
+        apply night vision without particles to player for 1 year
+    while player is online:
+        set title of player's scoreboard to "{@Title}"
+        set line 14 of player's scoreboard to ""
+        set line 13 of player's scoreboard to "&b&lᴘʟᴀʏᴇʀ"
+        set line 12 of player's scoreboard to " &8•&7 ᴛᴏᴋᴇɴs: &b%{revivaltokens::%player's uuid%}%"
+        set line 11 of player's scoreboard to " &8•&7 sᴛᴀᴛᴜs: &b%{status::%player's uuid%}%"
+        set line 10 of player's scoreboard to ""
+        set line 9 of player's scoreboard to "&b&lᴇᴠᴇɴᴛ"
+        set line 8 of player's scoreboard to " &8•&7 ᴇᴠᴇɴᴛ: &b%{event::*}%"
+        set line 7 of player's scoreboard to " &8•&7 ᴀʟɪᴠᴇ: &b%size of {alive::*}%"
+        set line 6 of player's scoreboard to ""
+        set line 5 of player's scoreboard to "&b&lsᴇʀᴠᴇʀ"
+        set line 4 of player's scoreboard to " &8•&7 ᴏɴʟɪɴᴇ: &b%size of all players%"
+        set line 3 of player's scoreboard to " &8•&7 ᴅᴇᴀᴅ: &b%size of {dead::*}%"
+        set line 2 of player's scoreboard to ""
+        set line 1 of player's scoreboard to "{@IP}"
+        wait 1 tick
+
+on join:
+    if {@CustomJoinMessage} is true:
+        set {joinlist::*} to "&a&l+&7 • &7Oh, &f%player%&7 has joined!", "&a&l+&7 • &7Everyone, say hello to &f%player%&7!", "&a&l+&7 • &7Hey there, &f%player%&7! Welcome!", "&a&l+&7 • &7Say hello to &f%player%&7!" and "&a&l+&7 • &7Glad you joined, &f%player%&7!"
+        set join message to random element of {joinlist::*}
+        play sound "minecraft:block.note_block.pling" at pitch 2 to players
+
+on leave:
+    if {@CustomLeaveMessage} is true:
+        set {leavelist::*} to "&c&l-&7 • &7&f%player%&7 has left, that's a shame.", "&c&l-&7 • &f%player%&7 has left us...", "&c&l-&7 • &f%player%&7 left." and "&c&l-&7 • &7Oh, &f%player%&7 left."
+        set leave message to random element of {leavelist::*}
+        play sound "minecraft:block.note_block.bass" at volume 100 to players
+
+on death of player:
+    if {alive::*} contains victim:
+        add victim to {dead::*}
+        remove victim from {alive::*}
+        set {status::%victim's uuid%} to "&cᴅᴇᴀᴅ"
+    if {dead::*} doesn't contain victim:
+        add victim to {dead::*}
+        set {status::%victim's uuid%} to "&cᴅᴇᴀᴅ"
+
+on leave:
+    if {alive::*} contains player:
+        remove player from {alive::*}
+    remove player from {dead::*}
+
+on respawn:
+    if {@ApplyNightVision} is true:
+        set respawn location to {spawn}
+        wait 1 tick
+        apply night vision without particles to player for 1 year
+    set respawn location to {spawn}
+
+on death of player:
+    if {reviverecent::*} doesn't contain victim:
+        add victim to {reviverecent::*}
+        wait 30 seconds
+        remove victim from {reviverecent::*}
+
+command /timer [<integer>] [<text>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 is an integer:
+            if {_timer} isn't set:
+                if arg-2 is "seconds" or "second":
+                    set {_timer} to arg-1
+                    while {_timer} > 0:
+                        broadcast "&b&lTIMER:&7 &f%{_timer}%&7 seconds left!"
+                        play sound "minecraft:block.note_block.bit" at volume 100 to players
+                        wait 1 second
+                        remove 1 from {_timer}
+                    broadcast ""
+                    broadcast "&b&lTIMER:&7 Timer is at &f0&7!"
+                    broadcast ""
+                    play sound "minecraft:block.note_block.bell" at volume 100 to players
+                    delete {_timer}
+
+                else if arg-2 is "minutes" or "minute":
+                    set {_timer} to arg-1
+                    while {_timer} > 0:
+                        broadcast "&b&lTIMER:&7 &f%{_timer}%&7 minutes left!"
+                        play sound "minecraft:block.note_block.bit" at volume 100 to players
+                        wait 1 minute
+                        remove 1 from {_timer}
+                    broadcast ""
+                    broadcast "&b&lTIMER:&7 Timer is at &f0&7!"
+                    broadcast ""
+                    play sound "minecraft:block.note_block.bell" at volume 100 to players
+                    delete {_timer}
+                else if arg-2 isn't "minutes", "minute", "seconds" or "second":
+                    send ""
+                    send "&c&lWOAH!&7 You need to specify if you want the timer to be in seconds or minutes! Like for example: &f/timer 60 seconds&7."
+                    send ""
+                    play sound "minecraft:block.note_block.bass" at volume 100 to player
+            else:
+                send ""
+                send "&c&lWOAH!&7 You already have an on-going timer!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        else:
+            send ""
+            send "&c&lWOAH!&7 You must put in the amount of seconds! Like for example: &f/timer 60 minutes / seconds&7."
+            send ""
+            play sound "minecraft:block.note_block.bass" at volume 100 to player
+
+command /setspawnlocation:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        set {spawn} to location of player
+        send ""
+        send "&c&lYAY!&7 You have successfully changed the spawn location!"
+        send ""
+        play sound "minecraft:block.note_block.bell" at volume 100 to player
+
+command /giverevive [<player>] [<integer>]:
+    aliases: givetoken, tokengive, revivegive
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 is a player:
+            if arg-2 is an integer:
+                add arg-2 to {revivaltokens::%arg-1's uuid%}
+                broadcast ""
+                broadcast "&b&lTOKEN: &f%arg-1%&7 has received &f%arg-2%&7 tokens from &f%sender%&7!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else:
+                send ""
+                send "&c&lWOAH!&7 Please name the amount of tokens that you want to give to the player!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        else:
+            send ""
+            send "&c&lWOAH!&7 Please name the player that you want to give tokens to!"
+            send ""
+            play sound "minecraft:block.note_block.bass" at volume 100 to player
+
+command /userevive:
+    trigger:
+        if {revivaltokens::%player's uuid%} >= 1:
+            if {tokenusage} is true:
+                remove 1 from {revivaltokens::%player's uuid%}
+                broadcast ""
+                broadcast "&b&lREVIVE: &f%sender%&7 has used an revival token!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else:
+                send ""
+                send "&c&lWOAH!&7 You cannot use revival tokens anymore!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        else:
+            send ""
+            send "&c&lWOAH!&7 You don't have enough revival tokens!"
+            send ""
+            play sound "minecraft:block.note_block.bass" at volume 100 to player
+
+command /tokenusage [<text>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 is "enable", "true" or "yes":
+            if {tokenusage} isn't set:
+                set {tokenusage} to true
+                broadcast ""
+                broadcast "&b&lTOKEN: &f%sender%&7 has &aenabled&7 tokens!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {tokenusage} is set:
+                send ""
+                send "&c&lWOAH!&7 Tokens are already enabled!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 is "disable", "false" or "no":
+            if {tokenusage} is set:
+                delete {tokenusage}
+                set {tokenusage} to true
+                broadcast ""
+                broadcast "&b&lTOKEN: &f%sender%&7 has &aenabled&7 tokens!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {tokenusage} isn't set:
+                send ""
+                send "&c&lWOAH!&7 Tokens are already disabled!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 isn't set:
+            if {tokenusage} isn't set:
+                set {tokenusage} to true
+                broadcast ""
+                broadcast "&b&lTOKEN: &f%sender%&7 has &aenabled&7 tokens!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {tokenusage} is set:
+                delete {tokenusage}
+                broadcast ""
+                broadcast "&b&lTOKEN: &f%sender%&7 has &cdisabled&7 tokens!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+
+
+command /staffchat [<text>]:
+    aliases: /sc, /staff
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        loop all players where [input has permission "lazycore.admin"]:
+            if arg-1 is set:
+                send "&b&lSTAFF: &f%player's display name% &8»&f %arg 1%" to loop-player
+            else if arg-1 isn't set:
+                if {staffchat.%player%} isn't set:
+                    set {staffchat.%player%} to true
+                    send ""
+                    send "&b&lSTAFF: &7Your messages will now be sent to the staff chat!"
+                    send ""
+                    play sound "minecraft:block.note_block.bell" at volume 100 to player
+                else if {staffchat.%player%} is set:
+                    delete {staffchat.%player%}
+                    send ""
+                    send "&b&lSTAFF: &7Your messages will no longer be sent to the staff chat!"
+                    send ""
+                    play sound "minecraft:block.note_block.bell" at volume 100 to player
+
+on chat:
+    if {staffchat.%player%} is true:
+        cancel event
+        loop all players where [input has permission "lazycore.admin"]:
+            send "&b&lSTAFF: &f%player's display name% &8»&f %message%" to loop-player
+
+command /removerevive [<player>] [<integer>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 is set:
+            if arg-2 is an integer:
+                remove arg-2 from {revivaltokens::%arg-1's uuid%}
+                broadcast ""
+                broadcast "&b&lTOKEN: &f%sender%&7 has removed &f%arg-2%&7 tokens from &f%arg-1%&7!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else:
+                send ""
+                send "&c&lWOAH!&7 You need to name the amount of tokens you want to remove from the player!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        else:
+            send ""
+            send "&c&lWOAH!&7 You need to name the player that you want to remove tokens from!"
+            send ""
+            play sound "minecraft:block.note_block.bass" at volume 100 to player
+
+command /tokens [<player>]:
+    aliases: revivaltokens, tokenamount
+    trigger:
+        if arg-1 is set:
+            send ""
+            send "&b&lTOKEN: &f%arg-1%&7 has &f%{revivaltokens::%arg-1's uuid%}%&7 tokens!"
+            send ""
+            play sound "minecraft:block.note_block.bell" at volume 100 to player
+        else:
+            send ""
+            send "&b&lTOKEN:&7 You have &f%{revivaltokens::%player's uuid%}%&7 tokens!"
+            send ""
+            play sound "minecraft:block.note_block.bell" at volume 100 to player
+
+command /clearrevive [<player>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 is set:
+            set {revivaltokens::%arg-1's uuid%} to 0
+            broadcast ""
+            broadcast "&b&lTOKEN: &f%sender%&7 has cleared the revival tokens of &f%arg-1%!"
+            broadcast ""
+            play sound "minecraft:block.note_block.bell" at volume 100 to players
+        else:
+            set {revivaltokens::%player's uuid%} to 0
+            broadcast ""
+            broadcast "&b&lTOKEN: &f%sender%&7 has cleared the revival tokens of &f%sender%!"
+            broadcast ""
+            play sound "minecraft:block.note_block.bell" at volume 100 to players
+
+command /core:
+    aliases: lazycore, servercore
+    trigger:
+        send ""
+        send "                            &x&0&8&4&c&f&b&lʟ&x&2&0&6&4&f&b&lᴀ&x&3&7&7&c&f&c&lᴢ&x&4&f&9&4&f&c&lʏ&x&6&6&a&b&f&c&lᴄ&x&7&e&c&3&f&c&lᴏ&x&9&5&d&b&f&d&lʀ&x&a&d&f&3&f&d&lᴇ"
+        send ""
+        send "                &7This server uses &x&0&8&4&c&f&b&lʟ&x&2&0&6&4&f&b&lᴀ&x&3&7&7&c&f&c&lᴢ&x&4&f&9&4&f&c&lʏ&x&6&6&a&b&f&c&lᴄ&x&7&e&c&3&f&c&lᴏ&x&9&5&d&b&f&d&lʀ&x&a&d&f&3&f&d&lᴇ&7!"
+        send ""
+        send "                    &7Developed by &9@&x&0&8&4&c&f&b&lɴ&x&2&4&6&8&f&b&lᴏ&x&3&f&8&4&f&c&lᴛ&x&5&b&a&0&f&c&lᴀ&x&7&6&b&b&f&c&lᴢ&x&9&2&d&7&f&d&lᴇ&x&a&d&f&3&f&d&lx&7!"
+        send ""
+        play sound "minecraft:block.note_block.bit" at volume 100 to player
+
+command /alive [<text>]:
+    trigger:
+        if arg-1 isn't set:
+            send "&b&lALIVE: &7There is currently &f%size of {alive::*}%&7 players alive."
+            play sound "minecraft:block.note_block.bell" at volume 100 to sender
+        if arg-1 is "list" or "detailed":
+            send "&b&lALIVE: &7%{alive::*}% (&f%size of {alive::*}%&7)" to player
+            play sound "minecraft:block.note_block.bell" at volume 100 to sender
+
+command /dead [<text>]:
+    trigger:
+        if arg-1 isn't set:
+            send "&b&lDEAD: &7There is currently &f%size of {dead::*}%&7 players dead."
+            play sound "minecraft:block.note_block.bell" at volume 100 to sender
+        if arg-1 is "list" or "detailed":
+            send "&b&lDEAD: &7%{dead::*}% (&f%size of {dead::*}%&7)" to player
+            play sound "minecraft:block.note_block.bell" at volume 100 to sender
+            
+command /number [<integer>] [<integer>] [<text>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-3 isn't set:
+            if arg-1 is set:
+                if arg-2 is set:
+                    clear {_num}
+                    set {_num} to random integer between arg-1 and arg-2
+                    broadcast ""
+                    broadcast "&b&lNUMBER: &f%sender%&7 has generated an number from between &f%arg-1%&7 and &f%arg-2%&7! The number is &f%{_num}%&7!"
+                    broadcast ""
+                    play sound "minecraft:block.note_block.bell" at volume 100 to players
+                else:
+                    send ""
+                    send "&c&lWOAH!&7 You used the command wrong!"
+                    send ""
+                    play sound "minecraft:block.note_block.bass" at volume 100 to player
+            else:   
+                send ""
+                send "&c&lWOAH!&7 You used the command wrong!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-3 is "private":
+            if arg-1 is set:
+                if arg-2 is set:
+                    clear {_num}
+                    set {_num} to random integer between arg-1 and arg-2
+                    send ""
+                    send "&b&lNUMBER: &7You have generated an number from between &f%arg-1%&7 and &f%arg-2%&7! The number is &f%{_num}%&7!"
+                    send ""
+                    play sound "minecraft:block.note_block.bell" at volume 100 to sender
+
+command /spawn:
+    trigger:
+        if {alive::*} doesn't contain sender:
+            teleport sender to {spawn}
+        else if {alive::*} contains sender:
+            send ""
+            send "&c&lWOAH!&7 You cannot go to spawn, because you are alive."
+            send ""
+            play sound "minecraft:block.note_block.bass" at volume 100 to sender
+
+
+command /revive [<player>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 isn't set:
+            send ""
+            send "&c&lWOAH!&7 You are using the command wrong! You need to name the player that you want to revive."
+            send ""
+            play sound "minecraft:block.note_block.bass" at volume 100 to players
+        if arg-1 is set:
+            if {alive::*} doesn't contain arg-1:
+                wait 1 tick
+                add arg-1 to {alive::*}
+                wait 1 tick
+                remove arg-1 from {dead::*}
+                set {status::%arg-1's uuid%} to "&aᴀʟɪᴠᴇ"
+                teleport arg-1 to sender
+                broadcast ""
+                broadcast "&b&lREVIVE: &f%player%&7 has revived &f%arg-1%!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else:
+                send ""
+                send "&c&lWOAH!&7 %arg-1%&7 is already alive!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to players
+
+command /reviveall [<text>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 isn't set:
+            broadcast ""
+            broadcast "&b&lREVIVE: &f%player%&7 has revived everyone!"
+            broadcast ""
+            play sound "minecraft:block.note_block.bell" at volume 100 to players
+            loop all players:
+                if loop-player is not player:
+                    if {dead::*} contains loop-player:
+                        add loop-player to {alive::*}
+                        set {status::%loop-player's uuid%} to "&aᴀʟɪᴠᴇ"
+                        wait 1 tick
+                        remove loop-player from {dead::*}
+                        teleport loop-player to sender
+        if arg-1 is "fast":
+            broadcast ""
+            broadcast "&b&lREVIVE: &f%player%&7 has revived everyone!"
+            broadcast ""
+            play sound "minecraft:block.note_block.bell" at volume 100 to players
+            loop all players:
+                if loop-player is not player:
+                    if {dead::*} contains loop-player:
+                        add loop-player to {alive::*}
+                        set {status::%loop-player's uuid%} to "&aᴀʟɪᴠᴇ"
+                        wait 1 tick
+                        remove loop-player from {dead::*}
+                        teleport loop-player to sender
+        if arg-1 is "slow":
+            broadcast ""
+            broadcast "&b&lREVIVE: &f%player%&7 has revived everyone!"
+            broadcast ""
+            play sound "minecraft:block.note_block.bell" at volume 100 to players
+            loop all players:
+                if loop-player is not player:
+                    if {dead::*} contains loop-player:
+                        add loop-player to {alive::*}
+                        set {status::%loop-player's uuid%} to "&aᴀʟɪᴠᴇ"
+                        loop {dead::*}:
+                            wait 5 ticks
+                            teleport loop-player-1 to sender
+                            wait 1 tick
+                            remove loop-player-1 from {dead::*}
+
+command /tpalive [<text>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 isn't set:
+            teleport players in {alive::*} to sender
+            broadcast ""
+            broadcast "&b&lTELEPORT: &f%player%&7 has teleported &aalive&7 players to them &ffast&7."
+            broadcast ""
+            play sound "minecraft:block.note_block.bell" at volume 100 to players
+        if arg-1 is "slow":
+            broadcast "%nl%&b&lTELEPORT: &f%player%&7 has teleported &aalive&7 players to them &fslowly&7.%nl%"
+            play sound "minecraft:block.note_block.bell" at volume 100 to players
+            loop players in {alive::*}:
+                if loop-player is not player:
+                    loop {alive::*}:
+                        wait 5 ticks
+                        teleport loop-player to sender
+        if arg-1 is "fast":
+            teleport players in {alive::*} to sender
+            broadcast ""
+            broadcast "&b&lTELEPORT: &f%player%&7 has teleported &aalive&7 players to them &ffast&7."
+            broadcast ""
+            play sound "minecraft:block.note_block.bell" at volume 100 to players
+
+command /tpall [<text>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 isn't set:
+            teleport all players to sender
+            broadcast ""
+            broadcast "&b&lTELEPORT: &f%player%&7 has executed a &ffast&7 teleport."
+            broadcast ""
+            play sound "minecraft:block.note_block.bell" at volume 100 to players
+        if arg-1 is "slow":
+            clear {slowtp::*}
+            broadcast ""
+            broadcast "&b&lTELEPORT: &f%player%&7 has executed a &fslow&7 teleport."
+            broadcast ""
+            play sound "minecraft:block.note_block.bell" at volume 100 to players
+            loop all players:
+                if loop-player is not player:
+                    add loop-player to {slowtp::*}
+                    loop {slowtp::*}:
+                        wait 5 ticks
+                        teleport loop-player to sender
+        if arg-1 is "fast":
+            teleport all players to sender
+            broadcast ""
+            broadcast "&b&lTELEPORT: &f%player%&7 has executed a &ffast&7 teleport."
+            broadcast ""
+            play sound "minecraft:block.note_block.bell" at volume 100 to players
+
+command /tpdead [<text>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 isn't set:
+            teleport players in {dead::*} to sender
+            broadcast "%nl%&b&lTELEPORT: &f%player%&7 has teleported &cdead&7 players to them &ffast&7.%nl%"
+            play sound "minecraft:block.note_block.bell" at volume 100 to players
+        if arg-1 is "slow":
+            broadcast "%nl%&b&lTELEPORT: &f%player%&7 has teleported &cdead&7 players to them &fslowly&7.%nl%"
+            play sound "minecraft:block.note_block.bell" at volume 100 to players
+            loop players in {dead::*}:
+                if loop-player is not player:
+                    loop {dead::*}:
+                        wait 5 ticks
+                        teleport loop-player to sender
+        if arg-1 is "fast":
+            teleport players in {dead::*} to sender
+            broadcast "%nl%&b&lTELEPORT: &f%player%&7 has teleported &cdead&7 players to them &ffast&7.%nl%"
+            play sound "minecraft:block.note_block.bell" at volume 100 to players
+
+command /unrevive [<player>]:
+    aliases: unalive
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if {alive::*} contains arg-1:
+            remove arg-1 from {alive::*}
+            add arg-1 to {dead::*}
+            set {status::%arg-1's uuid%} to "&cᴅᴇᴀᴅ"
+            broadcast ""
+            broadcast "&b&lKILL: &f%sender%&7 has removed &f%arg-1%&7 from the alive list."
+            broadcast ""
+            play sound "minecraft:block.note_block.bell" at volume 100 to players
+        else:
+            send ""
+            send "&c&lWOAH! &f%arg-1%&7 isn't alive!"
+            send ""
+            play sound "minecraft:block.note_block.bass" at volume 100 to player
+
+command /reviverecent:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if size of {reviverecent::*} isn't 0:
+            add {reviverecent::*} to {alive::*}
+            remove {reviverecent::*} from {dead::*}
+            teleport players in {reviverecent::*} to sender
+            loop all players:
+                if {reviverecent::*} contains loop-player:
+                    set {status::%loop-player's uuid%} to "&aᴀʟɪᴠᴇ"
+            broadcast ""
+            broadcast "&b&lREVIVE: &f%player%&7 has revived everyone who died in the last &f30&7 seconds! (&f%size of {reviverecent::*}%&7)"
+            broadcast ""
+            clear {reviverecent::*}
+            play sound "minecraft:block.note_block.bell" at volume 100 to players
+        else if size of {reviverecent::*} is 0:
+            send ""
+            send "&c&lWOAH!&7 There's no players who have died recently!"
+            send ""
+            play sound "minecraft:block.note_block.bass" at volume 100 to player
+
+command /hide [<text>] [<player>]:
+    trigger:
+        if arg-1 isn't set:
+            if arg-2 isn't set:
+                if {visibility::%player%} is set:
+                    if {hidelock} isn't set:
+                        delete {visibility::%player%}
+                        clear {hiddenplayers::%player%::*}
+                        reveal all players to player
+                        send ""
+                        send "&b&lHIDE:&7 You have revealed everyone!"
+                        send ""
+                        play sound "minecraft:block.note_block.bell" at volume 100 to player
+                    else:
+                        send ""
+                        send "&b&lHIDE:&7 You cannot use &f/hide&7 at the moment!"
+                        send ""
+                        play sound "minecraft:block.note_block.bass" at volume 100 to player
+                else:
+                    if {hidelock} isn't set:
+                        clear {hiddenplayers::%player%::*}
+                        hide all players from player
+                        loop all players where [input has permission "lazycore.admin"]:
+                            reveal loop-player-1 to player
+                        set {visibility::%player%} to true
+                        add all players to {visibility::%player%::*}
+                        send ""
+                        send "&b&lHIDE:&7 You have hidden everyone except staff!"
+                        send ""
+                        play sound "minecraft:block.note_block.bell" at volume 100 to player
+                    else:
+                        send ""
+                        send "&b&lHIDE:&7 You cannot use &f/hide&7 at the moment!"
+                        send ""
+                        play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 isn't set:
+            if arg-2 is set:
+                if {visibility::%player%} is set:
+                    if {hiddenplayers2::%player%::*} doesn't contain arg-2:
+                        if {hidelock} isn't set:
+                            add arg-2 to {hiddenplayers2::%player%::*}
+                            reveal arg-2 to sender
+                            send ""
+                            send "&b&lHIDE:&7 You have revealed &f%arg-2%&7!"
+                            send ""
+                            play sound "minecraft:block.note_block.bell" at volume 100 to player
+                        else:
+                            send ""
+                            send "&b&lHIDE:&7 You cannot use &f/hide&7 at the moment!"
+                            send ""
+                            play sound "minecraft:block.note_block.bass" at volume 100 to player
+                    else if {hiddenplayers2::%player%::*} contains arg-2:
+                        if {hidelock} isn't set:
+                            remove arg-2 from {hiddenplayers2::%player%::*}
+                            hide arg-2 from sender
+                            send ""
+                            send "&b&lHIDE:&7 You have hidden &f%arg-2%&7!"
+                            send ""
+                            play sound "minecraft:block.note_block.bell" at volume 100 to player
+                        else:
+                            send ""
+                            send "&b&lHIDE:&7 You cannot use &f/hide&7 at the moment!"
+                            send ""
+                            play sound "minecraft:block.note_block.bass" at volume 100 to player
+                if {hiddenplayers::%player%::*} doesn't contain arg-2:
+                    if {visibility::%player%} isn't set:
+                        if {hidelock} isn't set:
+                            add arg-2 to {hiddenplayers::%player%::*}
+                            hide arg-2 from sender
+                            send ""
+                            send "&b&lHIDE:&7 You have succesfully hidden &f%arg-2%&7!"
+                            send ""
+                            play sound "minecraft:block.note_block.bell" at volume 100 to player
+                        else:
+                            send ""
+                            send "&b&lHIDE:&7 You cannot use &f/hide&7 at the moment!"
+                            send ""
+                            play sound "minecraft:block.note_block.bass" at volume 100 to player
+                    else if {hiddenplayers::%player%::*} contains arg-2:
+                        if {visibility::%player%} isn't set:
+                            if {hidelock} isn't set:
+                                remove arg-2 from {hiddenplayers::%player%::*}
+                                reveal arg-2 to sender
+                                send ""
+                                send "&b&lHIDE:&7 You have revealed &f%arg-2%&7!"
+                                send ""
+                                play sound "minecraft:block.note_block.bell" at volume 100 to player
+                            else:
+                                send ""
+                                send "&b&lHIDE:&7 You cannot use &f/hide&7 at the moment!"
+                                send ""
+                                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 is "host":
+            if player has permission "lazycore.admin":
+                if {hidelock} isn't set:
+                    set {hidelock} to true
+                    hide all players from all players
+                    loop all players:
+                        loop all players where [input has permission "lazycore.admin"]:
+                            reveal loop-player-2 to all players
+                            reveal all players to loop-player-2
+                    broadcast ""
+                    broadcast "&b&lHIDE: &f%sender%&7 has hidden everyone except staff from everyone!"
+                    broadcast ""
+                    play sound "minecraft:block.note_block.bell" at volume 100 to players
+                else:
+                    delete {hidelock}
+                    reveal all players to all players
+                    broadcast ""
+                    broadcast "&b&lHIDE: &f%sender%&7 has disabled staff visibility!"
+                    broadcast ""
+                    play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else:
+                send ""
+                send "&c&lNO PERMISSION!&7 You cannot use &f/hide host&7 because you aren't a staff member."
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+
+command /killall:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        kill all players
+        broadcast ""
+        broadcast "&b&lKILL: &f%player%&7 has killed everyone!"
+        broadcast ""
+        play sound "minecraft:block.note_block.bell" at volume 100 to players
+
+command /kill [<player>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        kill arg-1
+        broadcast ""
+        broadcast "&b&lKILL: &f%sender%&7 has sent &f%arg-1%&7 back to lobby! [/kill]"
+        broadcast ""
+
+command /pvp [<text>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 isn't set:
+            if {pvp} isn't set:
+                broadcast ""
+                broadcast "&b&lPVP: &f%sender%&7 has &aenabled&7 PvP!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+                set {pvp} to true
+            else if {pvp} is not false:
+                broadcast ""
+                broadcast "&b&lPVP: &f%sender%&7 has &cdisabled&7 PvP!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+                delete {pvp}
+        if arg-1 is "on" or "enable":
+            if {pvp} isn't set:
+                set {pvp} to true
+                broadcast ""
+                broadcast "&b&lPVP: &f%sender%&7 has &aenabled&7 PvP!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {pvp} is set:
+                send ""
+                send "&c&lWOAH!&7 PvP has already been &aenabled&7!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 is "off" or "disable":
+            if {pvp} is set:
+                delete {pvp}
+                broadcast ""
+                broadcast "&b&lPVP: &f%sender%&7 has &aenabled&7 PvP!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {pvp} isn't set:
+                send ""
+                send "&c&lWOAH!&7 PvP has already been &cdisabled&7!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+                            
+on damage:
+    if attacker doesn't have permission "lazycore.admin":
+        if attacker is a player:
+            if {pvp} is false:
+                if victim is a player:
+                    cancel event
+
+command /build [<text>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 is "off", "disable" or "false":
+            if {building} is set:
+                delete {building}
+                broadcast ""
+                broadcast "&b&lBUILD: &f%sender%&7 has &cdisabled&7 building!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {building} isn't set:
+                send ""
+                send "&c&lWOAH!&7 Building has already been disabled!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 is "on", "enable" or "true":
+            if {building} isn't set:
+                set {building} to true
+                broadcast ""
+                broadcast "&b&lBUILD: &f%sender%&7 has &aenabled&7 building!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {building} is set:
+                send ""
+                send "&c&lWOAH!&7 Building has already been enabled!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 isn't set:
+            if {building} isn't set:
+                set {building} to true
+                broadcast ""
+                broadcast "&b&lBUILD: &f%sender%&7 has &aenabled&7 building!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {building} is set:
+                delete {building}
+                broadcast ""
+                broadcast "&b&lBUILD: &f%sender%&7 has &cdisabled&7 building!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+
+command /break [<text>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 is "off", "disable" or "false":
+            if {break} is set:
+                delete {break}
+                broadcast ""
+                broadcast "&b&lBREAK: &f%player%&7 has &cdisabled&7 breaking!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {break} isn't set:
+                send ""
+                send "&c&lWOAH!&7 Breaking has already been disabled!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 is "on", "enable" or "true":
+            if {break} isn't set:
+                set {break} to true
+                broadcast ""
+                broadcast "&b&lBREAK: &f%player%&7 has &aenabled&7 breaking!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {break} is set:
+                send ""
+                send "&c&lWOAH!&7 Breaking has already been enabled!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to players
+        if arg-1 isn't set:
+            if {break} isn't set:
+                set {break} to true
+                broadcast ""
+                broadcast "&b&lBREAK: &f%player%&7 has &aenabled&7 breaking!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {break} is set:
+                delete {break}
+                broadcast ""
+                broadcast "&b&lBREAK: &f%player%&7 has &cdisabled&7 breaking!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            
+
+command /falldamage [<text>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 is "off", "disable" or "false":
+            if {falldamage} is set:
+                delete {falldamage}
+                broadcast ""
+                broadcast "&b&lFALL DAMAGE: &f%player%&7 has &cdisabled&7 fall damage!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {falldamage} isn't set:
+                send ""
+                send "&c&lWOAH!&7 Fall damage has already been disabled!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 is "on", "enable" or "true":
+            if {falldamage} isn't set:
+                set {falldamage} to true
+                broadcast ""
+                broadcast "&b&lFALL DAMAGE: &f%player%&7 has &aenabled&7 fall damage!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {falldamage} is set:
+                send ""
+                send "&c&lWOAH!&7 Fall damage has already been enabled!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 isn't set:
+            if {falldamage} isn't set:
+                set {falldamage} to true
+                broadcast ""
+                broadcast "&b&lFALL DAMAGE: &f%player%&7 has &aenabled&7 fall damage!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {falldamage} is set:
+                delete {falldamage}
+                broadcast ""
+                broadcast "&b&lFALL DAMAGE: &f%player%&7 has &cdisabled&7 fall damage!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+
+command /flow [<text>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 is "off", "disable" or "false":
+            if {flowing} is set:
+                delete {flowing}
+                broadcast ""
+                broadcast "&b&lFLOWING: &f%player%&7 has &cdisabled&7 flowing!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {flowing} isn't set:
+                send ""
+                send "&c&lWOAH!&7 Flowing has already been disabled!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 is "on", "enable" or "true":
+            if {flowing} isn't set:
+                set {flowing} to true
+                broadcast ""
+                broadcast "&b&lFLOWING: &f%player%&7 has &aenabled&7 flowing!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {flowing} is true:
+                send ""
+                send "&c&lWOAH!&7 Flowing has already been enabled!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 isn't set:
+            if {flowing} isn't set:
+                set {flowing} to true
+                broadcast ""
+                broadcast "&b&lFLOWING: &f%player%&7 has &aenabled&7 flowing!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {flowing} is set:
+                delete {flowing} 
+                broadcast ""
+                broadcast "&b&lFLOWING: &f%player%&7 has &cdisabled&7 flowing!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+
+command /heal [<player>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 isn't set:
+            set health of sender to maximum health of player
+            send ""
+            send "&c&lYAY!&7 You have healed yourself."
+            send ""
+            play sound "minecraft:block.note_block.bell" at volume 100 to player
+        if arg-1 is set:
+            set health of arg-1 to maximum health of player
+            broadcast ""
+            broadcast "&b&lHEAL: &f%sender%&7 has healed &f%arg-1%&7!"
+            broadcast ""
+            play sound "minecraft:block.note_block.bell" at volume 100 to arg-1
+
+command /event [<text>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 is set:
+            clear {event::*}
+            set {event::*} to arg 1
+            send "&b&lEVENT:&7 You have succesfully set the event to &f%arg-1%&7!"
+            play sound "minecraft:block.note_block.bell" at volume 100 to player
+        else:
+            send "&c&lWOAH!&7 You didn't name the event!"
+            play sound "minecraft:block.note_block.bass" at volume 100 to player
+
+
+command /rename [<text>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if player's tool is not air:
+            if arg-1 is set:
+                set name of player's tool to colored arg-1
+            else:
+                send ""
+                send "&c&lWOAH!&7 You used the command wrong! &f/rename (text)"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        else:
+            send ""
+            send "&c&lWOAH!&7 You must have an item on your hand to rename it!"
+            send ""
+            play sound "minecraft:block.note_block.bass" at volume 100 to player
+
+command /healall:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        set health of players to maximum health of player
+        broadcast ""
+        broadcast "&b&lHEAL: &f%sender%&7 has healed everyone!"
+        broadcast ""
+        play sound "minecraft:block.note_block.bell" at volume 100 to player
+
+command /jump [<text>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 is "off" or "disable":
+            if {jump} isn't set:
+                set {jump} to true
+                broadcast ""
+                broadcast "&b&lJUMPING: &f%sender%&7 has &cdisabled&7 jumping!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else:
+                send ""
+                send "&c&lWOAH!&7 Jumping has already been disabled!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 is "on" or "enable":
+            if {jump} is set:
+                delete {jump}
+                broadcast ""
+                broadcast "&b&lJUMPING: &f%sender%&7 has &aenabled&7 jumping!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else:
+                send ""
+                send "&c&lWOAH!&7 Jumping has already been enabled!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 isn't set:
+            if {jump} isn't set:
+                set {jump} to true
+                broadcast ""
+                broadcast "&b&lJUMPING: &f%sender%&7 has &cdisabled&7 jumping!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else:
+                delete {jump}
+                broadcast ""
+                broadcast "&b&lJUMPING: &f%sender%&7 has &aenabled&7 jumping!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+
+command hunger [<text>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 is "on" or "enable":
+            if {hunger} isn't set:
+                set {hunger} to true
+                broadcast ""
+                broadcast "&b&lHUNGER: &f%sender%&7 has &aenabled&7 hunger."
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {hunger} is set:
+                send ""
+                send "&c&lWOAH!&7 Hunger has already been disabled!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 is "off" or "disable":
+            if {hunger} is set:
+                delete {hunger}
+                loop all players:
+                    set food level of loop-players to 10
+                broadcast ""
+                broadcast "&b&lHUNGER: &f%sender%&7 has &cdisabled&7 hunger."
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {hunger} isn't set:
+                send ""
+                send "&c&lWOAH!&7 Hunger has already been disabled!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 isn't set:
+            if {hunger} isn't set:
+                set {hunger} to true
+                broadcast ""
+                broadcast "&b&lHUNGER: &f%sender%&7 has &aenabled&7 hunger."
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {hunger} is set:
+                delete {hunger}
+                loop all players:
+                    set food level of loop-players to 10
+                broadcast ""
+                broadcast "&b&lHUNGER: &f%sender%&7 has &cdisabled&7 hunger."
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+
+command /teleportingarrow [<text>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 is "enable", "on" or "true":
+            if {teleporting_arrow} isn't set:
+                set {teleporting_arrow} to true
+                broadcast ""
+                broadcast "&b&lARROWS: &f%sender%&7 has &aenabled&7 teleporting arrows!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {teleporting_arrow} is set:
+                send ""
+                send "&c&lWOAH!&7 Teleporting arrows have already been enabled!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 is "false", "disable" or "off":
+            if {teleporting_arrow} is set:
+                set {teleporting_arrow} to false
+                broadcast ""
+                broadcast "&b&lARROWS: &f%sender%&7 has &cdisabled&7 teleporting arrows!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {teleporting_arrow} isn't set:
+                send ""
+                send "&c&lWOAH!&7 Teleporting arrows hve already been disabled!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 isn't set:
+            if {teleporting_arrow} isn't set:
+                set {teleporting_arrow} to true
+                broadcast ""
+                broadcast "&b&lARROWS: &f%sender%&7 has &aenabled&7 teleporting arrows!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else:
+                delete {teleporting_arrow}
+                broadcast ""
+                broadcast "&b&lARROWS: &f%sender%&7 has &cdisabled&7 teleporting arrows!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+
+# ---------------------------------------------------------------------------------------------------------------------------
+
+# ONLY WORKS IF YOU USE LUCKPERMS!
+
+command giverank [<player>] [<string>]:
+    permission: op
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 is set:
+            if arg-2 is set:
+                execute console command "/lp user %arg-1% parent set %arg-2%"
+                send ""
+                send "&c&lYAY!&7 You have successfully given &f%arg-1%&7 the rank &f%arg-2%&7."
+                send ""
+        if arg-1 or arg-2 isn't set:
+            send ""
+            send "&c&lWOAH!&7 You used the command wrong!"
+            send ""       
+
+command removerank [<player>] [<text>]:
+    permission: op
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-2 isn't set:
+            if arg-1 is set:
+                execute console command "/lp user %arg-1% parent set default"
+                send ""
+                send "&c&lYAY!&7 You have successfully removed all ranks from &f%arg-1%&7."
+                send ""
+        if arg-1 isn't set:
+            send ""
+            send "&c&lWOAH!&7 You used the command wrong!"
+            send ""
+        if arg-2 is set:
+            if arg-1 is set:
+                execute console command "/lp user %arg-1% parent remove %arg-2%"
+                send ""
+                send "&c&lYAY!&7 You have successfully removed the &f%arg-2%&7 rank from &f%arg-1%&7!"
+                send ""
+
+# ---------------------------------------------------------------------------------------------------------------------------
+
+on hunger meter change:
+    if {hunger} isn't set:
+        if "%region at player%" does not contain "ffanew":
+            cancel event
+
+on damage:
+    if damage cause is fall:
+        if {falldamage} isn't set:
+            cancel event 
+
+on place:
+    if {build} isn't set:
+        if "%region at player%" doesn't contain "{@ArenaRegion}":
+            if player doesn't have permission "lazycore.admin":
+                cancel event
+
+on break:
+    if player is in region "{@ArenaRegion}":
+        if event-block is in region "{@ArenaRegion}":
+            stop
+        else:
+            cancel event
+
+on break:
+    if {break} isn't set:
+        if player doesn't have permission "lazycore.admin":
+            cancel event
+
+on jump:
+    if {jump} is set:
+        if player doesn't have permission "lazycore.admin":
+            cancel event
+
+on join:
+    delete {visibility::%player%}
+        
+on flow:
+    if {flowing} isn't set:
+        cancel event
+
+on chat:
+    if {mutechat} is "staff":
+        if sender doesn't have permission "lazycore.admin":
+            cancel event
+    else if {mutechat} is true:
+        if sender doesn't have permission "lazycore.mutechatbypass" or "lazycore.admin":
+            cancel event
+
+on damage:
+    if attacker doesn't have permission "lazycore.admin":
+        if attacker is a player:
+            if {pvp} isn't set:
+                if victim is a player:
+                    cancel event
+
+on projectile hit:
+    if projectile is an arrow:
+        if "%region at shooter%" doesn't contain "ffanew":
+            if {teleporting_arrow} is true:
+                set {_arrow} to projectile
+                wait 1 tick
+                teleport shooter to {_arrow}
+                clear projectile
+
+
+command /mutechat [<text>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 is "enable", "on" or "true":
+            if {mutechat} isn't set:
+                set {mutechat} to true
+                broadcast ""
+                broadcast "&b&lMUTE: &f%player%&7 has &cmuted&7 the chat!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {mutechat} is set:
+                send ""
+                send "&c&lWOAH!&7 Chat has already been muted!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 is "disable", "off" or "false":
+            if {mutechat} is set:
+                delete {mutechat}
+                broadcast ""
+                broadcast "&b&lMUTE: &f%player%&7 has &aunmuted&7 the chat!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else:
+                send "%nl%&c&lWOAH!&7 Chat is already unmuted!%nl%"
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 is "staff":
+            if {mutechat} isn't "staff":
+                set {mutechat} to "staff"
+                broadcast "%nl%&b&lMUTE: &f%player%&7 has &aenabled&7 staff only chat!%nl%"
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else:
+                delete {mutechat}
+                broadcast "%nl%&b&lMUTE: &f%player%&7 has &aunmuted&7 the chat!%nl%"
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+        if arg-1 isn't set:
+            if {mutechat} is set:
+                delete {mutechat}
+                broadcast ""
+                broadcast "&b&lMUTE: &f%player%&7 has &aunmuted&7 the chat!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {mutechat} isn't set:
+                set {mutechat} to true
+                broadcast ""
+                broadcast "&b&lMUTE: &f%player%&7 has &cmuted&7 the chat!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+
+command listclear:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        clear {alive::*}
+        clear {dead::*}
+        send ""
+        send "&b&lYAY! &7The &aalive &7and &cdead&7 list has been successfully cleared."
+        send ""
+        play sound "minecraft:block.note_block.bell" at volume 100 to player
+
+on command "/plugins":
+    if {@HidePlugins} is true:
+        cancel event
+        send "&fServer Plugins (1): <link:https://discord.gg/rzzsZkVrfd>&aLazyCore"
+
+on command "/bukkit:plugins":
+    if {@HidePlugins} is true:
+        cancel event
+        send "&fServer Plugins (1): <link:https://discord.gg/rzzsZkVrfd>&aLazyCore"
+
+on command "/bukkit:pl":
+    if {@HidePlugins} is true:
+        cancel event
+        send "&fServer Plugins (1): <link:https://discord.gg/rzzsZkVrfd>&aLazyCore"
+
+on command "/pl":
+    if {@HidePlugins} is true:
+        cancel event
+        send "&fServer Plugins (1): <link:https://discord.gg/rzzsZkVrfd>&aLazyCore"     
+
+command /skip [<text>]:
+    trigger:
+        if arg-1 isn't set:
+            if {skips::%player's uuid%} >= 1:
+                if {skipusage} is true:
+                    remove 1 from {skips::%player's uuid%}
+                    add player to {skipsrecent::*}
+                    loop all players:
+                        if loop-player has permission "op":
+                            send ""
+                            send "&b&lSKIP: &f%player%&7 has used an skip! Will you &aaccept&7 it or &cdeny&7 it?"
+                            send ""
+                else:
+                    send ""
+                    send "&c&lWOAH!&7 Skips are disabled at the moment!"
+                    send ""
+                    play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 is "accept":
+            if player has permission "lazycore.admin":
+                if size of {skipsrecent::*} isn't 0:
+                    teleport players in {skipsrecent::*} to sender
+                    add sender to {skipsrecentowner::*}
+                    send "&b&lSKIP: &f%{skipsrecentowner::*}%&7 has &aaccepted&7 your skip!"
+                    play sound "minecraft:block.note_block.bell" at volume 100 to players in {skipsrecent::*}
+                    clear {skipsrecent::*}
+                    clear {skipsrecentowner::*}
+                else:
+                    send "&c&lWOAH!&7 No one has used an skip!"
+                    play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 is "deny":
+            if player has permission "lazycore.admin":
+                if size of {skipsrecent::*} isn't 0:
+                    add sender to {skipsrecentowner::*}
+                    loop players in {skipsrecent::*}:
+                        add 1 to {skips::%loop-player's uuid%}
+                        send "&b&lSKIP: &f%{skipsrecentowner::*}%&7 didn't accept your skip!"
+                        play sound "minecraft:block.note_block.bass" at volume 100 to loop-player
+                        clear {skipsrecent::*}
+                        clear {skipsrecentowner::*}
+                else:
+                    send "&c&lWOAH!&7 No one has used an skip!"
+                    play sound "minecraft:block.note_block.bass" at volume 100 to player
+
+command /skipusage [<text>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 is "enable", "true" or "yes":
+            if {skipusage} isn't set:
+                set {skipusage} to true
+                broadcast ""
+                broadcast "&b&lSKIP: &f%sender%&7 has &aenabled&7 skips!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {skipusage} is set:
+                send ""
+                send "&c&lWOAH!&7 Skips are already enabled!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 is "disable", "false" or "no":
+            if {skipusage} is set:
+                delete {skipusage}
+                set {skipusage} to true
+                broadcast ""
+                broadcast "&b&lSKIP: &f%sender%&7 has &aenabled&7 skips!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {skipusage} isn't set:
+                send ""
+                send "&c&lWOAH!&7 Skips are already disabled!"
+                send ""
+                play sound "minecraft:block.note_block.bass" at volume 100 to player
+        if arg-1 isn't set:
+            if {skipusage} isn't set:
+                set {skipusage} to true
+                broadcast ""
+                broadcast "&b&lSKIP: &f%sender%&7 has &aenabled&7 skips!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else if {skipusage} is set:
+                delete {skipusage}
+                broadcast ""
+                broadcast "&b&lSKIP: &f%sender%&7 has &cdisabled&7 skips!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+
+command /giveskip [<player>] [<integer>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 is set:
+            if arg-2 is set:
+                add arg-2 to {skips::%arg-1's uuid%}
+                broadcast ""
+                broadcast "&b&lSKIP: &f%sender%&7 gave &f%arg-1%&7 &7%arg-2%&7 skip(s)!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else:
+                add 1 to {skips::%arg-1's uuid%}
+                broadcast ""
+                broadcast "&b&lSKIP: &f%sender%&7 gave &f%arg-1%&7 &71 skip!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players          
+        else:
+            add 1 to {skips::%player's uuid%}
+            send "&b&lSKIP:&7 You have given yourself &f1&7 skip!"
+            play sound "minecraft:block.note_block.bell" at volume 100 to player
+
+command /removeskip [<player>] [<integer>]:
+    permission: lazycore.admin
+    permission message: &c&lNO PERMISSION!&7 You cannot use this command because you aren't a staff member.
+    trigger:
+        if arg-1 is set:
+            if arg-2 is set:
+                remove arg-2 from {skips::%arg-1's uuid%}
+                broadcast ""
+                broadcast "&b&lSKIP: &f%sender%&7 has removed &f%arg-2%&7 skips from &f%arg-1%&7!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+            else:
+                remove 1 from {skips::%arg-1's uuid%}
+                broadcast ""
+                broadcast "&b&lSKIP: &f%sender%&7 has removed &f1&7 skip from &f%arg-1%&7!"
+                broadcast ""
+                play sound "minecraft:block.note_block.bell" at volume 100 to players
+        else:
+            send "&c&lWOAH!&7 You need to name the player that you want to remove skips from!"
+            play sound "minecraft:block.note_block.bass" at volume 100 to player
+
+command /skips [<player>]:
+    trigger: 
+        send "&b&lSKIP: &f%arg-1%&7 has &f%{skips::%arg-1's uuid%}%&7 skips!"
+        play sound "minecraft:block.note_block.bass" at volume 100 to player
+
+on tab complete of "/alive" and "/dead":
+    set tab completions for position 1 to "detailed"
+        
+on tab complete of "/hunger", "/teleportingarrow", "/pvp", "/mutechat", "/build", "/flow", "/break", "/jump", "/tokenusage" and "/falldamage":
+    set tab completions for position 1 to "on" and "off"
+        
+on tab complete of "/hide":
+    if player has permission "lazycore.admin":
+        set tab completions for position 1 to "host"
+    
+on tab complete of "/tpall", "/tpdead", "/reviveall" and "/tpalive":
+    if player has permission "lazycore.admin":
+        set tab completions for position 1 to "slow" and "fast"
